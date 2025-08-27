@@ -27,7 +27,20 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    
+    const cakeCollection = client.db('cakeDB').collection('cake');
+
+    app.get('/cake', async (req, res) => {
+      const cursor = cakeCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.post('/cake', async (req, res) => {
+      const newCake = req.body;
+      console.log(newCake);
+      const result = await cakeCollection.insertOne(newCake);
+      res.send(result);
+    });
 
 
     // Send a ping to confirm a successful connection
@@ -41,7 +54,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get('/', (req, res) => {
-    res.send("User management server is running");
+    res.send("Cake making management server is running");
 })
 
 app.listen(port, () => {
