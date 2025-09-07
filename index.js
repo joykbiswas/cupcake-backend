@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const jwt = require('jsonwebtoken');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();  
 const port = process.env.PORT || 5000;
 
@@ -29,6 +30,7 @@ async function run() {
 
     const cakeCollection = client.db('cakeDB').collection('cake');
     const usersCollection = client.db('cakeDB').collection('users');
+     const cartCollection = client.db('cakeDB').collection('carts');
 
     //jwt related api
     app.post('/jwt', async(req, res) =>{
@@ -69,12 +71,6 @@ async function run() {
       res.send(result);
     })
 
-    app.get('/cake', async (req, res) => {
-      const cursor = cakeCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    });
-
     app.post('/cake', async (req, res) => {
       const newCake = req.body;
       console.log(newCake);
@@ -82,6 +78,67 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/cake', async (req, res) => {
+      const cursor = cakeCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    
+    app.get('/cake/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cakeCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.patch('/cake/:id', async (req, res) => {
+      const id = req.params.id;
+      const item = req.body; 
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          name: item.name,
+          description: item.description,
+          sizes: item.sizes,
+          price: item.price,
+          images: item.images,
+          category: item.category,
+          tags: item.tags,
+          inStock: item.inStock
+        }
+      };
+      const result = await cakeCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    app.delete('/cake/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cakeCollection.deleteOne(query);
+      res.send(result);
+    }); 
+
+    // cart collection
+   
+    app.post('/cart', async (req, res) =>{ 
+      const  cartItem = req.body;
+      const result = await cartCollection.insertOne(cartItem);
+      res.send(result);
+    });
+
+    app.get('/cart', verifyToken, async (req, res) =>{
+      const email = req.query.email; 
+      const query = {email: email};
+      const result = await cartCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    app.delete('/cart/:id', async (req, res) =>{
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartCollection.deleteOne(query);
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
