@@ -2,12 +2,21 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();  
 const port = process.env.PORT || 5000;
 
 //middleware
-app.use(cors())
+app.use(cors(
+  {
+    origin: ["http://localhost:5173",
+    ],
+    Credential: true,
+    optionSuccessStatus: 200,
+  }
+));
+
 app.use(express.json())
 
 
@@ -138,6 +147,7 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await cartCollection.deleteOne(query);
+      console.log(result);
       res.send(result);
     });
 
