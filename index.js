@@ -47,6 +47,7 @@ async function run() {
       const user = req.body;
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn:'1h'});
+        console.log("token inside", token);
         res.send({token});
     })
 
@@ -66,6 +67,11 @@ async function run() {
       })
     } 
     app.get('/users',verifyToken, async (req, res) =>{
+      const result = await usersCollection.find().toArray()
+      res.send(result);
+    })
+    
+    app.get('/all-users', async(req, res) =>{
       const result = await usersCollection.find().toArray()
       res.send(result);
     })
@@ -257,6 +263,12 @@ async function run() {
         return res.status(403).send({message: 'forbidden access'})
       }
       const result = await paymentCollection.find(query).toArray()
+      res.send(result);
+    })
+
+    // payment history show valid user 
+    app.get('/all-payments', async(req, res) =>{
+      const result = await paymentCollection.find().toArray()
       res.send(result);
     })
 
