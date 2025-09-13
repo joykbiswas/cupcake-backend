@@ -12,7 +12,7 @@ app.use(cors(
   {
     origin: ["https://cupcake-two.vercel.app", "http://localhost:5173"
     ],
-    Credential: true,
+    credentials: true,
     optionSuccessStatus: 200,
   }
 ));
@@ -272,14 +272,10 @@ async function run() {
       res.send(result);
     })
 
-
-
-
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
-    // Ensures that the client will close when you finish/error
     // await client.close();
   }
 }
@@ -289,7 +285,15 @@ app.get('/', (req, res) => {
     res.send("Cake making management server is running");
 })
 
+if (process.env.NODE_ENV === 'production') {
+  module.exports = app;
+} else {
+  // For local development
+  app.listen(port, () => {
+    console.log(`Server is running on port: ${port}`);
+  });
+}
 // app.listen(port, () => {
 //     console.log(`server is running on port: ${port}`);
 // });
-module.exports = app;
+// module.exports = app;
