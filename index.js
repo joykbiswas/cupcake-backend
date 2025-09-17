@@ -35,7 +35,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    //  client.connect();
 
     const cakeCollection = client.db('cakeDB').collection('cake');
     const usersCollection = client.db('cakeDB').collection('users');
